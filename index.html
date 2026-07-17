@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validación de Certificados - Iplacex</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- ESTILOS GENERALES --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #333;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        /* LOGO */
+        .logo-container {
+            margin-bottom: 30px;
+            margin-top: 10px;
+        }
+        
+        .logo-placeholder {
+            background-color: #285295;
+            color: white;
+            padding: 10px 15px;
+            font-weight: bold;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            width: fit-content;
+        }
+        
+        .logo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2px;
+            margin-right: 10px;
+        }
+        
+        .grid-box { width: 8px; height: 8px; background-color: white; }
+
+        /* TÍTULO DE PÁGINA */
+        .page-title {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #000;
+            margin-bottom: 25px;
+        }
+
+        .page-title i {
+            font-size: 1.5rem;
+            color: #285295;
+            margin-right: 10px;
+            font-weight: normal;
+        }
+
+        /* TARJETAS BLANCAS */
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .card h3 {
+            font-size: 1rem;
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #000;
+            font-weight: 700;
+        }
+
+        /* Instrucciones */
+        .instructions { list-style: none; padding: 0; margin: 0; }
+
+        .instruction-item {
+            display: flex;
+            align-items: flex-start;
+            font-size: 0.9rem;
+            color: #444;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .instruction-item i {
+            color: #285295;
+            margin-right: 10px;
+            margin-top: 4px;
+            font-size: 0.8rem;
+        }
+
+        /* --- ESTILOS DEL FALSO RECAPTCHA --- */
+        .fake-recaptcha {
+            background: #f9f9f9;
+            border: 1px solid #d3d3d3;
+            border-radius: 3px;
+            width: 100%;
+            max-width: 304px;
+            height: 78px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            box-sizing: border-box;
+            margin: 25px auto 0 auto;
+            box-shadow: 0 0 4px 1px rgba(0,0,0,0.08) inset;
+        }
+
+        .captcha-left { display: flex; align-items: center; }
+
+        .checkbox-container {
+            width: 28px; height: 28px; background: white;
+            border: 2px solid #c1c1c1; border-radius: 2px;
+            margin-right: 12px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: border 0.3s;
+        }
+        .checkbox-container:hover { border: 2px solid #b2b2b2; }
+
+        .checkmark { display: none; color: #009688; font-size: 24px; }
+
+        .spinner {
+            display: none;
+            border: 3px solid #f3f3f3; border-top: 3px solid #3498db;
+            border-radius: 50%; width: 18px; height: 18px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .captcha-label { font-family: Roboto, Arial, sans-serif; font-size: 14px; font-weight: 500; color: #555; }
+        .captcha-logo { display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .captcha-logo img { width: 32px; opacity: 0.5; margin-bottom: 2px; }
+        .captcha-terms { font-size: 10px; color: #555; line-height: 1.2; }
+
+        /* BOTONES */
+        .btn-primary {
+            width: 100%;
+            background-color: #285295;
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+        .btn-primary:hover { background-color: #1f3f75; }
+
+        /* --- ESTILOS DE LA SECCIÓN DE RESULTADOS --- */
+        #result-section {
+            display: none; /* Oculto por defecto */
+        }
+
+        .data-field { margin-bottom: 15px; }
+        .data-label { font-weight: 700; display: block; margin-bottom: 5px; color: #000; }
+        .data-value { font-size: 0.95rem; color: #333; }
+
+        .valid-message {
+            display: flex;
+            align-items: flex-start;
+            font-size: 0.9rem;
+            color: #333;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+        .valid-message i { color: #285295; margin-right: 10px; margin-top: 3px; }
+
+        /* Cajas grises de información */
+        .info-box {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        .info-box-label { font-weight: 700; display: block; margin-bottom: 5px; color: #000; font-size: 0.9rem; }
+        .info-box-value { font-size: 0.9rem; color: #333; }
+
+        /* Estilo para el enlace */
+        .ver-documento {
+            color: #285295;
+            text-decoration: underline;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.95rem;
+        }
+        .ver-documento i { margin-left: 5px; font-size: 0.9rem; }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="logo-container">
+            <div class="logo-placeholder">
+                <div class="logo-grid">
+                    <div class="grid-box"></div><div class="grid-box"></div><div class="grid-box"></div>
+                    <div class="grid-box"></div><div class="grid-box"></div><div class="grid-box"></div>
+                    <div class="grid-box"></div><div class="grid-box"></div><div class="grid-box"></div>
+                </div>
+                <span>Iplacex</span>
+            </div>
+        </div>
+
+        <div class="page-title">
+            <i class="far fa-user-circle"></i>
+            Validación de Certificados
+        </div>
+
+        <div id="validation-section">
+            <div class="card">
+                <h3>Aquí podrá validar los Certificados emitidos por la institución</h3>
+                <div class="instructions">
+                    <div class="instruction-item">
+                        <i class="fas fa-chevron-right"></i>
+                        <span>Para realizarlo debe Ingresar el Código de Verificación y luego hacer click en Validar.</span>
+                    </div>
+                    <div class="instruction-item">
+                        <i class="fas fa-chevron-right"></i>
+                        <span>Ingrese Código de certificado para validar.</span>
+                    </div>
+                </div>
+
+                <div class="fake-recaptcha">
+                    <div class="captcha-left">
+                        <div class="checkbox-container" id="captchaCheck">
+                            <div class="spinner" id="captchaSpinner"></div>
+                            <i class="fas fa-check checkmark" id="captchaMark"></i>
+                        </div>
+                        <span class="captcha-label">I'm not a robot</span>
+                    </div>
+                    <div class="captcha-logo">
+                        <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png" alt="logo">
+                        <div class="captcha-terms">reCAPTCHA<br>Privacy - Terms</div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn-primary" id="btnValidar">Validar</button>
+        </div>
+
+        <div id="result-section">
+            <div class="card">
+                <div class="data-field">
+                    <span class="data-label">Rut:</span>
+                    <span class="data-value">13.319.033-3</span>
+                </div>
+                <div class="data-field">
+                    <span class="data-label">Nombre:</span>
+                    <span class="data-value">Enzo Adrian Martinez Triviños</span>
+                </div>
+                <div class="data-field">
+                    <span class="data-label">Certificación:</span>
+                    <span class="data-value">INGENIERÍA EN ADMINISTRACIÓN MENCIÓN  SEGURIDAD PRIVADA</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Certificado vigente</h3>
+                <div class="valid-message">
+                    <i class="fas fa-chevron-right"></i>
+                    <span>El código ingresado corresponde a un CERTIFICADO válido</span>
+                </div>
+
+                <div class="info-box">
+                    <span class="info-box-label">Fecha emisión:</span>
+                    <span class="info-box-value">17/07/2026</span>
+                </div>
+                <div class="info-box">
+                    <span class="info-box-label">Fecha de egreso:</span>
+                    <span class="info-box-value">09 de Septiembre de 2022</span>
+                </div>
+                <div class="info-box">
+                    <span class="info-box-label">Ver certificado:</span>
+                    <a href="EnzoMartinezTriviños.pdf" class="ver-documento" target="_blank">
+                        Ver documento <i class="far fa-file"></i>
+                    </a>
+                </div>
+            </div>
+
+            <button class="btn-primary" id="btnVolver">Volver</button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Variables de control ---
+        let captchaVerified = false;
+        const validationSection = document.getElementById('validation-section');
+        const resultSection = document.getElementById('result-section');
+        const captchaCheck = document.getElementById('captchaCheck');
+        const captchaSpinner = document.getElementById('captchaSpinner');
+        const captchaMark = document.getElementById('captchaMark');
+        const btnValidar = document.getElementById('btnValidar');
+        const btnVolver = document.getElementById('btnVolver');
+
+        // --- Lógica del reCAPTCHA falso ---
+        captchaCheck.addEventListener('click', function() {
+            if (!captchaVerified) {
+                captchaSpinner.style.display = 'block'; // Muestra spinner
+                setTimeout(() => {
+                    captchaSpinner.style.display = 'none'; // Oculta spinner
+                    captchaMark.style.display = 'block';   // Muestra check
+                    captchaVerified = true;                // Marca como verificado
+                }, 600); // Espera 0.6s para simular carga
+            }
+        });
+
+        // --- Lógica del botón "Validar" ---
+        btnValidar.addEventListener('click', function() {
+            if (!captchaVerified) {
+                alert("Por favor, marca la casilla 'I'm not a robot'.");
+            } else {
+                // Ocultar sección de validación y mostrar resultados
+                validationSection.style.display = 'none';
+                resultSection.style.display = 'block';
+                window.scrollTo(0, 0); // Volver al inicio de la página
+            }
+        });
+
+        // --- Lógica del botón "Volver" ---
+        btnVolver.addEventListener('click', function() {
+            // Ocultar resultados y mostrar validación
+            resultSection.style.display = 'none';
+            validationSection.style.display = 'block';
+            
+            // Resetear el estado del captcha
+            captchaVerified = false;
+            captchaMark.style.display = 'none';
+            window.scrollTo(0, 0);
+        });
+    </script>
+
+</body>
+</html>
